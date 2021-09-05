@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/trietnguyen/Documents/Blockchain Development/NEAR SEPTEMBER/NEAR-Hackathon/smart-cert/contract/target/debug/build/typenum-0690c4427e5b2502/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/Users/trietnguyen/Documents/Blockchain Development/NEAR SEPTEMBER/NEAR-Hackathon/smart-cert/contract/target/debug/build/typenum-0690c4427e5b2502/out/op.rs

@@ -1,0 +1,1 @@
+/Users/trietnguyen/Documents/Blockchain\ Development/NEAR\ SEPTEMBER/NEAR-Hackathon/smart-cert/contract/target/wasm32-unknown-unknown/debug/libgreeter.rlib: /Users/trietnguyen/Documents/Blockchain\ Development/NEAR\ SEPTEMBER/NEAR-Hackathon/smart-cert/contract/src/lib.rs

@@ -1,121 +1,174 @@
-/*
- * This is an example of a Rust smart contract with two simple, symmetric functions:
- *
- * 1. set_greeting: accepts a greeting, such as "howdy", and records it for the user (account_id)
- *    who sent the request
- * 2. get_greeting: accepts an account_id and returns the greeting saved for it, defaulting to
- *    "Hello"
- *
- * Learn more about writing NEAR smart contracts with Rust:
- * https://github.com/near/near-sdk-rs
- *
- */
-
-// To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen, setup_alloc};
-use near_sdk::collections::LookupMap;
+use near_sdk::{env, near_bindgen, setup_alloc, AccountId };
+use std::collections::{HashMap};
+use near_sdk::collections::UnorderedMap;
+use near_sdk::serde::{Deserialize, Serialize};
 
-setup_alloc!();
+// setup_alloc!();
+#[global_allocator]
+static ALLOC: near_sdk::wee_alloc::WeeAlloc = near_sdk::wee_alloc::WeeAlloc::INIT;
 
-// Structs in Rust are similar to other languages, and may include impl keyword as shown below
-// Note: the names of the structs are not important when calling the smart contract, but the function names are
+// Define Model
+// #[near_bindgen]
+// #[derive(Copy, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Clone)]
+pub struct UserInfo {
+    pub name: String,
+    pub dob: String,
+    pub national_id: String,
+    pub from: Issuer, 
+}
+
+
+// #[near_bindgen]
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct CertInfo {
+    pub user_info: UserInfo,
+    pub is_first_approved: bool,
+}
+
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
-pub struct Welcome {
-    records: LookupMap<String, String>,
+pub struct SmartCertificateContract{
+    owner: AccountId, //Owners of this contract, the only person can add more issuers
+    issuers: UnorderedMap<AccountId, Issuer>, //List of issuers, only issuers in this list can create a cert
+    need_user_approved: HashMap<AccountId, CertInfo>, 
+    ready_deploy_nft: HashMap<AccountId, CertInfo> 
 }
 
-impl Default for Welcome {
-  fn default() -> Self {
-    Self {
-      records: LookupMap::new(b"a".to_vec()),
+
+// #[near_bindgen]
+#[derive(BorshDeserialize, BorshSerialize, Clone, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Issuer {
+    pub name: String,
+    pub issuer_id: AccountId 
+}
+
+impl Default for SmartCertificateContract {
+    fn default() -> Self {
+        env::panic(b"SmartCertificate contract should be initialized before usage")
     }
-  }
 }
 
 #[near_bindgen]
-impl Welcome {
-    pub fn set_greeting(&mut self, message: String) {
-        let account_id = env::signer_account_id();
+impl SmartCertificateContract {
+    #[init]
+    pub fn new() -> Self {
+        assert!(!env::state_exists(), "The contract is already initialized");
+        assert!(
+            env::is_valid_account_id(env::predecessor_account_id().as_bytes()),
+            "The NEAR Foundation account ID is invalid"
+        );
 
-        // Use env::log to record logs permanently to the blockchain!
-        env::log(format!("Saving greeting '{}' for account '{}'", message, account_id,).as_bytes());
-
-        self.records.insert(&account_id, &message);
-    }
-
-    // `match` is similar to `switch` in other languages; here we use it to default to "Hello" if
-    // self.records.get(&account_id) is not yet defined.
-    // Learn more: https://doc.rust-lang.org/book/ch06-02-match.html#matching-with-optiont
-    pub fn get_greeting(&self, account_id: String) -> String {
-        match self.records.get(&account_id) {
-            Some(greeting) => greeting,
-            None => "Hello".to_string(),
-        }
-    }
-}
-
-/*
- * The rest of this file holds the inline tests for the code above
- * Learn more about Rust tests: https://doc.rust-lang.org/book/ch11-01-writing-tests.html
- *
- * To run from contract directory:
- * cargo test -- --nocapture
- *
- * From project root, to run in combination with frontend tests:
- * yarn test
- *
- */
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use near_sdk::MockedBlockchain;
-    use near_sdk::{testing_env, VMContext};
-
-    // mock the context for testing, notice "signer_account_id" that was accessed above from env::
-    fn get_context(input: Vec<u8>, is_view: bool) -> VMContext {
-        VMContext {
-            current_account_id: "alice_near".to_string(),
-            signer_account_id: "bob_near".to_string(),
-            signer_account_pk: vec![0, 1, 2],
-            predecessor_account_id: "carol_near".to_string(),
-            input,
-            block_index: 0,
-            block_timestamp: 0,
-            account_balance: 0,
-            account_locked_balance: 0,
-            storage_usage: 0,
-            attached_deposit: 0,
-            prepaid_gas: 10u64.pow(18),
-            random_seed: vec![0, 1, 2],
-            is_view,
-            output_data_receivers: vec![],
-            epoch_height: 19,
+        SmartCertificateContract {
+            owner: env::predecessor_account_id(),
+            issuers: UnorderedMap::new(b"i".to_vec()),
+            need_user_approved: HashMap::new(),
+            ready_deploy_nft: HashMap::new(),
         }
     }
 
-    #[test]
-    fn set_then_get_greeting() {
-        let context = get_context(vec![], false);
-        testing_env!(context);
-        let mut contract = Welcome::default();
-        contract.set_greeting("howdy".to_string());
-        assert_eq!(
-            "howdy".to_string(),
-            contract.get_greeting("bob_near".to_string())
+    pub fn add_issuer(&mut self, issuer_account: AccountId, name: String) -> bool {
+        assert!(
+            env::is_valid_account_id(issuer_account.as_bytes()),
+            "The given account ID is invalid"
         );
+
+        self.assert_called_by_foundation();
+
+        if !self.issuers.get(&issuer_account).is_some() {
+            let new_issuer = Issuer {
+                name: name,
+                issuer_id: issuer_account.clone(),
+            };
+            self.issuers.insert(&issuer_account, &new_issuer);
+            return true;
+        }
+        return false;
     }
 
-    #[test]
-    fn get_default_greeting() {
-        let context = get_context(vec![], true);
-        testing_env!(context);
-        let contract = Welcome::default();
-        // this test did not call set_greeting so should return the default "Hello" greeting
+    pub fn create_cert(&mut self, user_account_id: AccountId, name: String, dob: String, national_id: String) {
+        assert!(
+            env::is_valid_account_id(user_account_id.as_bytes()),
+            "The given account ID is invalid"
+        );
+
+        self.assert_called_by_issuers();
+        // let issuers = std::mem::take(&mut self.issuers);
+        let issuer = self.issuers.get(&env::predecessor_account_id()).clone().unwrap();
+        let user = UserInfo {
+            name: name,
+            dob: dob,
+            national_id: national_id,
+            from: issuer.clone() 
+        };
+
+        let cert_info = CertInfo {
+            user_info: user,
+            is_first_approved: false
+        };
+
+        self.need_user_approved.insert(user_account_id, cert_info);
+    }
+
+    pub fn user_approved(&mut self) {
+
+        let cert = self.need_user_approved.get(&env::predecessor_account_id()).clone().unwrap();
+        let new_cert = CertInfo {
+            user_info: cert.user_info.clone(),
+            is_first_approved: true
+        };
+        self.need_user_approved.remove(&env::predecessor_account_id());
+        self.ready_deploy_nft.insert(env::predecessor_account_id(), new_cert);
+    }
+
+    // Issuer deploy cert as a NFT and return NFT address
+    //pub fn deployNFTCert() -> String {
+    //    //Issue an NFT by issuers
+    //    let string = "hello";
+    //    return *string;
+    //}
+
+    //User will receive a address of nft cert. User check their information. And then approve NFT.
+    pub fn approve_nft_cert_by_user() -> bool {
+        return true;
+
+    } 
+   
+    // Issuer will finalize cert and this cert is legal.
+    // pub fn finallize() -> bool {
+
+    // }
+
+    // Allow third party user can check the cert.
+    // pub fn checkCert() -> bool {
+
+    // }
+
+    pub fn get_issuers(&self) -> Vec<(AccountId, Issuer)> {
+        return self.issuers.to_vec();
+    }
+        
+    /************/
+    /* Internal */
+    /************/
+    
+    fn assert_called_by_foundation(&self) {
         assert_eq!(
-            "Hello".to_string(),
-            contract.get_greeting("francis.near".to_string())
+            &env::predecessor_account_id(),
+            &self.owner,
+            "Can only be called by NEAR Foundation"
+        );
+    }
+    
+    fn assert_called_by_issuers(&self) {
+        assert!(
+            self.issuers.get(&env::predecessor_account_id()).is_some(),
+            "Only call by issuers"
         );
     }
 }
+
+
+

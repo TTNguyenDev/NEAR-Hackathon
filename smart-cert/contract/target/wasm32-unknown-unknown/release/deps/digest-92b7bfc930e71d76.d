@@ -1,0 +1,10 @@
+/Users/trietnguyen/Documents/Blockchain Development/NEAR SEPTEMBER/NEAR-Hackathon/smart-cert/contract/target/wasm32-unknown-unknown/release/deps/digest-92b7bfc930e71d76.rmeta: /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/lib.rs /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/digest.rs /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/dyn_digest.rs /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/errors.rs
+
+/Users/trietnguyen/Documents/Blockchain Development/NEAR SEPTEMBER/NEAR-Hackathon/smart-cert/contract/target/wasm32-unknown-unknown/release/deps/libdigest-92b7bfc930e71d76.rlib: /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/lib.rs /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/digest.rs /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/dyn_digest.rs /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/errors.rs
+
+/Users/trietnguyen/Documents/Blockchain Development/NEAR SEPTEMBER/NEAR-Hackathon/smart-cert/contract/target/wasm32-unknown-unknown/release/deps/digest-92b7bfc930e71d76.d: /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/lib.rs /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/digest.rs /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/dyn_digest.rs /Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/errors.rs
+
+/Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/lib.rs:
+/Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/digest.rs:
+/Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/dyn_digest.rs:
+/Users/trietnguyen/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.8.1/src/errors.rs:
