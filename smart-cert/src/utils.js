@@ -26,7 +26,8 @@ export async function initContract() {
         'new',
         'add_issuer',
         'create_cert',
-        'user_approved'
+        'user_approved',
+        'nft_mint'
     ],
   })
 }
