@@ -8,14 +8,14 @@ const AddIssuersComponent = (props) => {
     // const [positive, setPositive] = useState(false);
     
     const submitToBlockchain = async () => {
-        let nft = await window.contract.nft_mint({ token_id: "0", token_owner_id: "nguyentest2.testnet"}, 
-            "300000000000000", // attached GAS (optional)
-            "1000000000000000000000000")
-        console.log(nft)
-        // await window.contract.add_issuer({
-        //     issuer_account: accountId.current.value,
-        //     name: name.current.value,
-        // });
+        // let nft = await window.contract.nft_mint({ token_id: "0", token_owner_id: "nguyentest2.testnet"}, 
+        //     "300000000000000", // attached GAS (optional)
+        //     "1000000000000000000000000")
+        // console.log(nft)
+        await window.contract.add_issuer({
+            issuer_account: accountId.current.value,
+            name: name.current.value,
+        });
     }
 
     return (

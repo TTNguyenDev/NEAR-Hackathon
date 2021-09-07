@@ -243,6 +243,7 @@ impl SmartCertificateContract {
             .filter(|(_k, v)| v.user_info.from.issuer_id == env::predecessor_account_id())
             .collect();
     }
+
     /************/
     /*  Utils   */
     /************/
