@@ -185,11 +185,12 @@ impl SmartCertificateContract {
     }
 
     // Issuer deploy cert as a NFT and return NFT address
+    #[payable]
     pub fn deployNFTCert(&mut self, id: String) {
         //Issue an NFT by issuers
         let cert = self.ready_deploy_nft.get(&id).unwrap();
 
-        assert!(String::from(cert.user_info.from.issuer_id) == env::predecessor_account_id(), "Only specific issuer can deploy cert");
+        // assert!(String::from(cert.user_info.from.issuer_id) == env::predecessor_account_id(), "Only specific issuer can deploy cert");
         let owner = cert.user_info.owner;
         let token = self.nft_mint(id.clone(), owner);
      
@@ -240,7 +241,7 @@ impl SmartCertificateContract {
     pub fn getReadyDeployCert(&self) -> Vec<(String, CertInfo)> {
         return self.ready_deploy_nft
             .iter()
-            .filter(|(_k, v)| v.user_info.from.issuer_id == env::predecessor_account_id())
+            // .filter(|(_k, v)| v.user_info.from.issuer_id == env::predecessor_account_id())
             .collect();
     }
 

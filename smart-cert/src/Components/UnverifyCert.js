@@ -3,7 +3,6 @@ import { Container, Button, Card } from 'react-bootstrap';
 
 const UnverifyCert = (props) => {
     const [certs, setCerts] = useState([]);
-    // const [totalDonation, setTotalDonation] = useState(0);
 
     const onApproveCert = async (id) => {
         await window.contract.user_approved({ id: id });
@@ -42,8 +41,6 @@ const UnverifyCert = (props) => {
                             Issuer Id: {cert.user_info.from.issuer_id}
                         </Card.Text>
                         <Button onClick={() => onApproveCert(id)}>Approve this Cert</Button>
-                          {/* <Card.Link href="#">Card Link</Card.Link> */}
-                        {/* <Card.Link href="#">Another Link</Card.Link> */}
                       </Card.Body>
                     </Card>
                 )

@@ -30,6 +30,7 @@ export async function initContract() {
         'user_approved',
         'deployNFTCert',
         'finalize',
+        'nft_mint',
         'getReadyDeployCert',
         'getUnApprovedCert',
 
