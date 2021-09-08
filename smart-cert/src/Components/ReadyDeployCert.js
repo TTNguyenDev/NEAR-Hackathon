@@ -1,12 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import { Container, Button, Card } from 'react-bootstrap';
+import {generatePath} from 'react-router-dom';
 
 const ReadyDeployCert = (props) => {
     const [certs, setCerts] = useState([]);
+    const [txid, setTxid] = useState("");
 
     const onDeployCert = async (id) => {
         localStorage.setItem("nft_id", id);
-        let nft = await window.contract.nft_mint({ token_id: "0", token_owner_id: "nguyentest2.testnet"}, 
+        let nft = await window.contract.nft_mint({ id: id }, 
             "300000000000000", // attached GAS (optional)
             "1000000000000000000000000")
         console.log(nft)
@@ -15,15 +17,19 @@ const ReadyDeployCert = (props) => {
         //                         "1000000000000000000000000");
     }
 
+    const onFinalize = async(id) => {
+        await window.contract.finalize({ id: id, txid: txid })
+
+    }
+
     useEffect(() => {
         async function getBlockchainData() {
             setCerts(await window.contract.getReadyDeployCert());
-        }
-        
+       }
         if (getParameterByName('transactionHashes') !== '') {
-            await.window.contract.finalize();
+            setTxid(getParameterByName('transactionHashes'));
         }
-        
+
         getBlockchainData();
     }, []);
 
@@ -52,7 +58,12 @@ const ReadyDeployCert = (props) => {
                         <Card.Text>
                             Issuer Id: {cert.user_info.from.issuer_id}
                         </Card.Text>
-                        <Button onClick={() => onDeployCert(id)}>Mint NFT Cert</Button>
+                          <Button onClick={() => {
+                              // console.log(txid === "")
+                              // console.log(txid)
+                            (txid === "" ? onDeployCert(id) : onFinalize(id))
+
+                          } }>{txid === "" ? "Mint NFT Cert" : "Finalize"}</Button>
                       </Card.Body>
                     </Card>
                 )
@@ -66,7 +77,7 @@ function getParameterByName(name, url = window.location.href) {
     name = name.replace(/[\[\]]/g, '\\$&');
     var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
         results = regex.exec(url);
-    if (!results) return null;
+    if (!results) return '';
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }

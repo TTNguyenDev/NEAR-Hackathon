@@ -184,40 +184,35 @@ impl SmartCertificateContract {
         self.ready_deploy_nft.insert(&id, &new_cert);
     }
 
-    // Issuer deploy cert as a NFT and return NFT address
-    #[payable]
-    pub fn deployNFTCert(&mut self, id: String) {
-        //Issue an NFT by issuers
-        let cert = self.ready_deploy_nft.get(&id).unwrap();
-
-        // assert!(String::from(cert.user_info.from.issuer_id) == env::predecessor_account_id(), "Only specific issuer can deploy cert");
-        let owner = cert.user_info.owner;
-        let token = self.nft_mint(id.clone(), owner);
-     
-        let token_serialize = TokenSerialize {
-           token_id: token.token_id,
-           owner_id: token.owner_id,
-           metadata: token.metadata.unwrap(),
-           tx: "".to_string()
-        };
-
-        self.nft_cert.insert(&id.clone(), &token_serialize);
-        self.ready_deploy_nft.remove(&id);
-    }
-
     #[payable]
     pub fn nft_mint(
         &mut self,
-        token_id: TokenId,
-        token_owner_id: ValidAccountId,
-    ) -> Token {
-        self.nft_token.mint(token_id, token_owner_id, Some(self.createMetaData()))
+        id: String,
+    ) {
+        self.assert_called_by_foundation();
+        let cert = self.ready_deploy_nft.get(&id).unwrap();
+        let owner = cert.user_info.owner;
+        let fakeID = id.clone() + "1";
+        let token = self.nft_token.mint(fakeID.clone(), owner, Some(self.createMetaData()));
+
+        let token_serialize = TokenSerialize {
+            token_id: token.token_id,
+            owner_id: token.owner_id,
+            metadata: token.metadata.unwrap(),
+            tx: "".to_string() 
+       };
+
+        self.nft_cert.insert(&id.clone(), &token_serialize); 
+
+
     }
 
-    pub fn finalize(&mut self, id: String, tx: String) {
-        let mut token_serialize = self.nft_cert.get(&id).unwrap(); 
-        token_serialize.tx = tx;
-        self.nft_cert.insert(&id.clone(), &token_serialize); 
+    pub fn finalize(&mut self, id: String, txid: String) {
+        let mut token = self.nft_cert.get(&id.clone()).unwrap();
+        token.tx = txid;
+
+        self.ready_deploy_nft.remove(&id.clone());
+        // self.nft_cert.insert(&id.clone(), &token); 
     }
 
     pub fn get_issuers(&self) -> Vec<(AccountId, Issuer)> {
