@@ -187,27 +187,39 @@ impl SmartCertificateContract {
     pub fn nft_mint(
         &mut self,
         id: String,
-    ) {
+    ) -> Token {
         self.assert_called_by_foundation();
         let cert = self.ready_deploy_nft.get(&id).unwrap();
         let owner = cert.user_info.owner;
-        let token = self.nft_token.mint(self.nft_cert.len().to_string(), owner, Some(self.create_meta_data()));
+        let token = self.nft_token.mint((self.nft_cert.len() + 1).to_string(), owner, Some(self.create_meta_data()));
 
         let token_serialize = TokenSerialize {
-            token_id: token.token_id,
-            owner_id: token.owner_id,
-            metadata: token.metadata.unwrap(),
+            token_id: token.token_id.clone(),
+            owner_id: token.owner_id.clone(),
+            metadata: token.metadata.clone().unwrap(),
             tx: "".to_string() 
        };
 
         self.nft_cert.insert(&id.clone(), &token_serialize); 
+        return token;
     }
 
     pub fn finalize(&mut self, id: String, txid: String) {
         let mut token = self.nft_cert.get(&id.clone()).unwrap();
-        token.tx = txid;
+        token.tx = txid.clone();
 
         self.ready_deploy_nft.remove(&id.clone());
+        self.nft_cert.remove(&id.clone());
+        self.nft_cert.insert(&txid.clone(), &token);
+    }
+    
+
+    /*****************/
+    /*  View Methods */
+    /*****************/
+
+    pub fn get_cert_info(&self, txid: String) -> TokenMetadata {
+        return self.create_meta_data();
     }
 
     pub fn get_issuers(&self) -> Vec<(AccountId, Issuer)> {
