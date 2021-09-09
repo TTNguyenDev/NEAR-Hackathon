@@ -13,7 +13,6 @@ use near_sdk::json_types::ValidAccountId;
 use near_sdk::{
     setup_alloc, env, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
 };
-use std::convert::TryFrom;
 
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
@@ -192,8 +191,7 @@ impl SmartCertificateContract {
         self.assert_called_by_foundation();
         let cert = self.ready_deploy_nft.get(&id).unwrap();
         let owner = cert.user_info.owner;
-        let fakeID = id.clone() + "1";
-        let token = self.nft_token.mint(fakeID.clone(), owner, Some(self.createMetaData()));
+        let token = self.nft_token.mint(self.nft_cert.len().to_string(), owner, Some(self.create_meta_data()));
 
         let token_serialize = TokenSerialize {
             token_id: token.token_id,
@@ -203,8 +201,6 @@ impl SmartCertificateContract {
        };
 
         self.nft_cert.insert(&id.clone(), &token_serialize); 
-
-
     }
 
     pub fn finalize(&mut self, id: String, txid: String) {
@@ -212,31 +208,29 @@ impl SmartCertificateContract {
         token.tx = txid;
 
         self.ready_deploy_nft.remove(&id.clone());
-        // self.nft_cert.insert(&id.clone(), &token); 
     }
 
     pub fn get_issuers(&self) -> Vec<(AccountId, Issuer)> {
         return self.issuers.to_vec();
     }
 
-    pub fn getCerts(&self) -> Vec<(String, TokenSerialize)> {
+    pub fn get_certs(&self) -> Vec<(String, TokenSerialize)> {
         return self
             .nft_cert
             .iter()
             .collect();
     }
  
-    pub fn getUnApprovedCert(&self) -> Vec<(String, CertInfo)> {
+    pub fn get_un_approved_cert(&self, owner_id: String) -> Vec<(String, CertInfo)> {
        return self.need_user_approved
            .iter()
-           .filter(|(_k, v)| String::from(v.user_info.owner.clone()) == env::predecessor_account_id())
+           .filter(|(_k, v)| String::from(v.user_info.owner.clone()) == owner_id)
            .collect();
     }
         
-    pub fn getReadyDeployCert(&self) -> Vec<(String, CertInfo)> {
+    pub fn get_ready_deploy_cert(&self) -> Vec<(String, CertInfo)> {
         return self.ready_deploy_nft
             .iter()
-            // .filter(|(_k, v)| v.user_info.from.issuer_id == env::predecessor_account_id())
             .collect();
     }
 
@@ -247,8 +241,7 @@ impl SmartCertificateContract {
         return [String::from(user), issuer].join("_");
     }
 
-    fn createMetaData(&self) -> TokenMetadata {
-        // let cert = self.ready_deploy_nft.get(&id);
+    fn create_meta_data(&self) -> TokenMetadata {
         TokenMetadata {
             title: Some(("First certificate").into()),
             description: Some("The tallest mountain in the charted solar system".into()),

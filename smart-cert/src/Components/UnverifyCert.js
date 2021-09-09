@@ -10,19 +10,16 @@ const UnverifyCert = (props) => {
 
     useEffect(() => {
         async function getBlockchainData() {
-            setCerts(await window.contract.getUnApprovedCert());
+            setCerts(await window.contract.get_un_approved_cert({ owner_id: await window.accountId }));
         }
         getBlockchainData();
     }, []);
 
     return (
         <Container>
-
             <p>&nbsp;</p>
             {certs.map((v,k) => {
                 let [id, cert] = v;
-
-                console.log(v);
                 return (
                     <Card style={{ width: '18rem' }}>
                       <Card.Body>

@@ -24,7 +24,7 @@ const ReadyDeployCert = (props) => {
 
     useEffect(() => {
         async function getBlockchainData() {
-            setCerts(await window.contract.getReadyDeployCert());
+            setCerts(await window.contract.get_ready_deploy_cert());
        }
         if (getParameterByName('transactionHashes') !== '') {
             setTxid(getParameterByName('transactionHashes'));

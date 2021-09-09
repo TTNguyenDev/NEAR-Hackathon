@@ -5,7 +5,6 @@ import * as nearAPI from 'near-api-js';
 const AddIssuersComponent = (props) => {
     const name = useRef();
     const accountId= useRef();
-    // const [positive, setPositive] = useState(false);
     
     const submitToBlockchain = async () => {
        await window.contract.add_issuer({

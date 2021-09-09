@@ -54,10 +54,6 @@ export default function App() {
             </Navbar>
 
             <Switch>
-                {/* <Route exact path='/'> */}
-                {/*     <Home/> */} 
-                {/* </Route> */}   
-                {/*Admin Route */}
                 <Route exact path='/Admin/addIssuer'>
                     <AddIssuersComponent/>
                 </Route>    

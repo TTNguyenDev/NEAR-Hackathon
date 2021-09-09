@@ -20,7 +20,9 @@ export async function initContract() {
     // View methods are read only. They don't modify the state, but usually return some value.
     viewMethods: [
         'get_issuers',
-        'getCerts',
+        'get_certs',
+        'get_ready_deploy_cert',
+        'get_un_approved_cert',
     ],
     // Change methods can modify the state. But you don't receive the returned value when called.
     changeMethods: [
@@ -28,12 +30,8 @@ export async function initContract() {
         'add_issuer',
         'create_cert',
         'user_approved',
-        'deployNFTCert',
         'finalize',
         'nft_mint',
-        'getReadyDeployCert',
-        'getUnApprovedCert',
-
     ],
   })
 }
