@@ -1,5 +1,4 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-// use std::collections::{HashMap};
 use near_sdk::collections::UnorderedMap;
 use near_sdk::serde::{Deserialize, Serialize};
 
@@ -11,7 +10,7 @@ use near_contract_standards::non_fungible_token::NonFungibleToken;
 use near_sdk::collections::LazyOption;
 use near_sdk::json_types::ValidAccountId;
 use near_sdk::{
-    setup_alloc, env, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
+    setup_alloc, env, near_bindgen, AccountId, BorshStorageKey, Promise, PromiseOrValue,
 };
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -24,12 +23,7 @@ enum StorageKey {
 }
 
 setup_alloc!();
-// #[global_allocator]
-// static ALLOC: near_sdk::wee_alloc::WeeAlloc = near_sdk::wee_alloc::WeeAlloc::INIT;
 
-// Define Model
-// #[near_bindgen]
-// #[derive(Copy, Clone)]
 #[derive(BorshDeserialize, BorshSerialize, Clone, Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct UserInfo {
@@ -49,7 +43,6 @@ pub struct TokenSerialize {
     pub tx: String,
 }
 
-// #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct CertInfo {
@@ -69,7 +62,6 @@ pub struct SmartCertificateContract{
     nft_cert: UnorderedMap<String, TokenSerialize>,
     nft_token: NonFungibleToken,
     metadata: LazyOption<NFTContractMetadata>,
-
 }
 
 // #[near_bindgen]
@@ -190,8 +182,8 @@ impl SmartCertificateContract {
     ) -> Token {
         self.assert_called_by_foundation();
         let cert = self.ready_deploy_nft.get(&id).unwrap();
-        let owner = cert.user_info.owner;
-        let token = self.nft_token.mint((self.nft_cert.len() + 1).to_string(), owner, Some(self.create_meta_data()));
+        let owner = cert.user_info.clone().owner;
+        let token = self.nft_token.mint((self.nft_cert.len() + 1).to_string(), owner, Some(self.create_meta_data(cert)));
 
         let token_serialize = TokenSerialize {
             token_id: token.token_id.clone(),
@@ -219,7 +211,8 @@ impl SmartCertificateContract {
     /*****************/
 
     pub fn get_cert_info(&self, txid: String) -> TokenMetadata {
-        return self.create_meta_data();
+        let cert = self.nft_cert.get(&txid.clone()).unwrap(); 
+        return cert.metadata;
     }
 
     pub fn get_issuers(&self) -> Vec<(AccountId, Issuer)> {
@@ -253,10 +246,12 @@ impl SmartCertificateContract {
         return [String::from(user), issuer].join("_");
     }
 
-    fn create_meta_data(&self) -> TokenMetadata {
-        TokenMetadata {
-            title: Some(("First certificate").into()),
-            description: Some("The tallest mountain in the charted solar system".into()),
+    fn create_meta_data(&self, cert: CertInfo) -> TokenMetadata {
+        let description = cert.user_info.name + &String::from("'s Certificate issued by ") + &cert.user_info.from.name;
+
+        return TokenMetadata {
+            title: Some("Certificate".into()),
+            description: Some(description.into()),
             media: None,
             media_hash: None,
             copies: Some(1u64),
@@ -267,7 +262,7 @@ impl SmartCertificateContract {
             extra: None,
             reference: None,
             reference_hash: None,
-        }
+        };
     }
         
     /************/

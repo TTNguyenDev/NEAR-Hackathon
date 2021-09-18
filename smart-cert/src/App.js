@@ -8,6 +8,8 @@ import CreateCertificate from './Components/CreateCertificate';
 import AddIssuersComponent from './Components/AddIssuersComponent';
 import ReadyDeployCert from './Components/ReadyDeployCert';
 
+import Home from './Components/Home';
+
 import {
     BrowserRouter as Router,
     Switch,
@@ -54,6 +56,9 @@ export default function App() {
             </Navbar>
 
             <Switch>
+                <Route exact path='/'>
+                    <Home/> 
+                </Route>   
                 <Route exact path='/Admin/addIssuer'>
                     <AddIssuersComponent/>
                 </Route>    

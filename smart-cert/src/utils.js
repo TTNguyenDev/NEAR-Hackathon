@@ -23,6 +23,7 @@ export async function initContract() {
         'get_certs',
         'get_ready_deploy_cert',
         'get_un_approved_cert',
+        'get_cert_info',
     ],
     // Change methods can modify the state. But you don't receive the returned value when called.
     changeMethods: [

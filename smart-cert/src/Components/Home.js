@@ -1,72 +1,57 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import { 
     Container,
     Row,
     Col,
     Card,
-    Button
+    Button,
+    Form
 } from 'react-bootstrap';
 
 const Home = (props) => {
 
-    const [positiveNumber, setPositiveNumber] = useState(0);
-    const [negativeNumber, setNegativeNumber] = useState(0);
-    const [totalDeclaration, setTotalDeclaration] = useState(0);
+    const [cert, setCert] = useState(null);
 
-    useEffect(() => {
-        async function getDeclarationData() {
-            setPositiveNumber(await window.contract.getPositiveNumber());
-            setNegativeNumber(await window.contract.getNegativeNumber());
-            setTotalDeclaration(await window.contract.getTotalDeclaration());
-            await window.contract.getListDeclaration();
-        }
-        getDeclarationData();
-    }, []);
+    const certHash = useRef();
+
+    // useEffect(() => {
+    //     async function getDeclarationData() {
+
+    //         setPositiveNumber(await window.contract.getPositiveNumber());
+    //         setNegativeNumber(await window.contract.getNegativeNumber());
+    //         setTotalDeclaration(await window.contract.getTotalDeclaration());
+    //         await window.contract.getListDeclaration();
+    //     }
+    //     getDeclarationData();
+    // }, []);
+
+    const getMetaData = async () => {
+        setCert(await window.contract.get_cert_info({txid: certHash.current.value}));
+    }
 
     return (
             <Container>
-                <Row>
-                    <Col className='justify-content-center d-flex'>
-                        <Container>
-                            <Row style={{ marginTop: '5vh' }}>
-                                  <Card border="success" style={{ 
-                                      width: '18rem',
-                                      display: 'flex',
-                                      justifyContent: 'center',
-                                      padding: '3vw'
-                                      }}>
-                                    <Card.Header style={{ display: 'flex', justifyContent: 'center' }}>Negative</Card.Header>
-                                    <Card.Body>
-                                        <Card.Text style={{ display: 'flex', justifyContent: 'center' }}>
-                                            {negativeNumber}/{totalDeclaration}
-                                      </Card.Text>
-                                    </Card.Body>
-                                  </Card>
-                                  <br />
-                            </Row>
-                        </Container>
-                    </Col>
-                    <Col className='justify-content-center d-flex'>
-                        <Container>
-                            <Row style={{ marginTop: '5vh' }}>
-                                  <Card border="danger" style={{ 
-                                      width: '18rem',
-                                      display: 'flex',
-                                      justifyContent: 'center',
-                                      padding: '3vw'
-                                      }}>
-                                    <Card.Header style={{ display: 'flex', justifyContent: 'center' }}>Positive</Card.Header>
-                                    <Card.Body>
-                                        <Card.Text style={{ display: 'flex', justifyContent: 'center' }}>
-                                          {positiveNumber}/{totalDeclaration} 
-                                      </Card.Text>
-                                    </Card.Body>
-                                  </Card>
-                                  <br />
-                            </Row>
-                        </Container>
-                    </Col>
-                </Row>
+                <h1>Check Your Cert</h1>
+
+                <Form>
+                    <Form.Group className='mb-3'>
+                        <Form.Label>Hash:</Form.Label>
+                        <Form.Control ref={certHash} placeholder='Enter cert hash'></Form.Control>
+                    </Form.Group>
+                </Form>
+                <Button onClick={() => getMetaData()} style={{width: '100%'}}>Check</Button>
+
+        {cert !== null ? 
+        <>
+            <h1>Cert Info</h1>
+            <h4>Title: {cert.title}</h4>
+            <h4>Description: {cert.description}</h4>
+            <a href={"https://explorer.testnet.near.org/transactions/" + certHash.current.value}>View on BlockExplorer</a>
+        </>
+        :
+        <></>
+        }
+
             </Container>
     );
 };
